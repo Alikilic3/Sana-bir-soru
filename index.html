@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Sana bir soru…</title>
+    <style>
+      :root {
+        --bg: #ffffff;
+        --text: #111;
+        --card: #f6f6f6;
+        --border: #ddd;
+      }
+      body {
+        margin: 0;
+        font-family:
+          system-ui,
+          -apple-system,
+          Segoe UI,
+          Roboto,
+          Arial,
+          sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        display: flex;
+        min-height: 100vh;
+        align-items: center;
+        justify-content: center;
+      }
+      .wrap {
+        width: min(560px, 92vw);
+        text-align: center;
+        padding: 24px;
+      }
+      .card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: 18px;
+      }
+      .img {
+        width: min(320px, 80vw);
+        aspect-ratio: 1/1;
+        margin: 0 auto 12px;
+        border-radius: 12px;
+        overflow: hidden;
+        background: #000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .img img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+      }
+      .q {
+        font-size: 18px;
+        margin: 10px 0 14px;
+      }
+
+      .btnRow {
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+        align-items: center;
+        flex-wrap: wrap;
+        margin-top: 6px;
+      }
+
+      button {
+        border: 1px solid #444;
+        background: #fff;
+        padding: 10px 16px;
+        border-radius: 10px;
+        font-size: 16px;
+        cursor: pointer;
+        transition:
+          transform 140ms ease,
+          box-shadow 140ms ease;
+        user-select: none;
+      }
+      button:active {
+        transform: translateY(1px);
+      }
+
+      /* Evet butonu: büyüme efekti */
+      #yesBtn {
+        font-size: 28px; /* videodaki gibi büyük başlar */
+        padding: 12px 22px;
+        transform-origin: center;
+        box-shadow: 0 0 0 rgba(0, 0, 0, 0);
+      }
+
+      /* Hayır butonu küçük ve “etiket” gibi duruyor */
+      #noBtn {
+        font-size: 12px;
+        padding: 6px 10px;
+        border-color: #bbb;
+        color: #444;
+        opacity: 0.95;
+        border-radius: 8px;
+      }
+
+      .hint {
+        margin-top: 10px;
+        font-size: 12px;
+        color: #666;
+      }
+
+      /* Evet dev olunca ekranda taşmasın diye */
+      .fullscreenYes {
+        position: fixed;
+        left: 50%;
+        top: 60%;
+        transform: translate(-50%, -50%) scale(var(--s, 1));
+        z-index: 9999;
+        border-width: 2px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="card">
+        <div class="img">
+          <!-- İstersen buraya kendi görsel/gif’ini koy:
+             1) klasöre "minion.gif" at
+             2) src="minion.gif" yap -->
+          <img
+            src="https://media.giphy.com/media/3oriO0OEd9QIDdllqo/giphy.gif"
+            alt="cute"
+          />
+        </div>
+
+        <div class="q" id="question">Benim sevgilim olur musun?</div>
+
+        <div class="btnRow">
+          <button id="yesBtn">Evet</button>
+          <button id="noBtn">Hayır</button>
+        </div>
+
+        <div class="hint" id="hint">Seçimini yap 🙂</div>
+      </div>
+    </div>
+
+    <script>
+      const yesBtn = document.getElementById("yesBtn");
+      const noBtn = document.getElementById("noBtn");
+      const hint = document.getElementById("hint");
+
+      // Videodaki gibi “hayır” metnini her tıklamada değiştiriyoruz
+      const noPhrases = [
+        "Emin misin?",
+        "Bebeğim lütfen…",
+        "Hadi ama…",
+        "Ciddi misin?",
+        "Son şans…",
+        "Tamam ama yine de…",
+      ];
+
+      let noCount = 0;
+
+      function applyYesScale() {
+        // Her hayırda Evet büyüsün.
+        // 1.0 -> 1.4 -> 2.0 -> 2.9 -> 4.2 -> 6.0 ... gibi
+        const scale = 1 + noCount * 0.55;
+
+        // Evet butonunu öne alıp fixed yapınca “ekranı kaplama” hissi artıyor
+        yesBtn.classList.add("fullscreenYes");
+        yesBtn.style.setProperty("--s", scale);
+
+        // Biraz da gölge verelim ki “baskın” dursun
+        yesBtn.style.boxShadow = "0 18px 60px rgba(0,0,0,0.18)";
+
+        // Çok büyüyünce ipucu güncelle
+        if (scale >= 4) hint.textContent = "Bence doğru seçim ortada 😄";
+        if (scale >= 6) hint.textContent = "Artık kaçış yok gibi...";
+      }
+
+      noBtn.addEventListener("click", () => {
+        noCount++;
+
+        // hayır buton yazısı değişsin (videodaki gibi)
+        const phrase = noPhrases[Math.min(noCount - 1, noPhrases.length - 1)];
+        noBtn.textContent = phrase;
+
+        applyYesScale();
+
+        // İstersen 6. “hayır”dan sonra hayırı tamamen kaybettirebilirsin:
+        // if (noCount >= 6) noBtn.style.display = "none";
+      });
+
+      yesBtn.addEventListener("click", () => {
+        // başarı sayfasına geç
+        window.location.href = "yes.html";
+      });
+    </script>
+  </body>
+</html>
